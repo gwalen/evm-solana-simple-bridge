@@ -32,6 +32,7 @@ pub struct RegisterForeignToken<'info> {
     )]
     pub foreign_token: Account<'info, ForeignToken>,
 
+    // pass it in accounts to make sure this accounts deserializes to Mint
     pub local_mint: Account<'info, Mint>,
 
     pub system_program: Program<'info, System>
