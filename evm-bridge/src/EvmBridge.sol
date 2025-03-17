@@ -10,7 +10,8 @@ contract EvmBridge is OwnableUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgrad
 
     address public relayer;
 
-    // Mapping from a foreign token identifier (bytes32) to a local BridgeErc20 token contract.
+    /// Mapping from a foreign token identifier (bytes32) to a local BridgeErc20 token contract.
+    /// On Solana addresses are 32 bytes
     mapping(bytes32 => BridgeErc20) public foreignTokens;
 
     event BurnEvent(address tokenMint, address tokenOwner, uint256 amount);

@@ -33,4 +33,8 @@ contract BridgeErc20 is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
 
     /// Only owner can upgrade.
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
 }
