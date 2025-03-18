@@ -12,6 +12,7 @@
   },
   "include": [
     "./ts-scripts",
+    "./scripts/*.ts",
     "./typechain-types",
   ],
   "files": [
