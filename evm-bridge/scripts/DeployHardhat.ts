@@ -66,6 +66,14 @@ export async function deployContracts() {
   await txRegister.wait();
   console.log("Token registered with EvmBridge");
 
+  // test only
+  const txMint = await token.mint(relayer, 1 *10 **6);
+  await txMint.wait();
+
+  console.log(await token.balanceOf(relayer));
+
+  .. add alice wallet mint to her so we can later run her wallet with burnAndBridge to wait to event
+
   console.log("Deployment complete!");
 }
 
