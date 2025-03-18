@@ -9,6 +9,11 @@ contract BridgeErc20 is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     
     address public bridge;
 
+    modifier onlyBridgeOrOwner() {
+        require(msg.sender == bridge || msg.sender == owner(), "Caller is not the bridge or owner contract");
+        _;
+    }
+
     function initialize(string memory name, string memory symbol, address owner, address _bridge) public initializer {
         __ERC20_init(name, symbol);
         __Ownable_init(owner);
@@ -16,18 +21,13 @@ contract BridgeErc20 is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
         bridge = _bridge;
     }
 
-    modifier onlyBridge() {
-        require(msg.sender == bridge, "Caller is not the bridge contract");
-        _;
-    }
-
     /// Mints amount tokens to the receiver address.
-    function mint(address receiver, uint256 amount) external onlyBridge() {
+    function mint(address receiver, uint256 amount) external onlyBridgeOrOwner() {
         _mint(receiver, amount);
     }
 
     /// Burns amount tokens from the account address.
-    function burn(address account, uint256 amount) external onlyBridge() {
+    function burn(address account, uint256 amount) external onlyBridgeOrOwner() {
         _burn(account, amount);
     }
 

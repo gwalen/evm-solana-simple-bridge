@@ -27,9 +27,17 @@ contract EvmBridgeTest is Test {
         token = new BridgeErc20();
         token.initialize("Test Token", "TT", owner, address(bridge));
 
+        vm.startPrank(owner);
+        uint256 mintAmount = 1 * TOKEN_DECIMALS;
+        token.mint(alice, mintAmount);
+        assertEq(token.balanceOf(alice), mintAmount);
+        token.burn(alice, mintAmount);
+        assertEq(token.balanceOf(alice), 0);
+
         // As owner, register the token in the bridge using the foreign token identifier.
-        vm.prank(owner);
+        // vm.prank(owner);
         bridge.registerForeignToken(token, foreignTokenAddress);
+        vm.stopPrank();
     }
 
     function testRegisterForeignToken() public view {
@@ -40,9 +48,9 @@ contract EvmBridgeTest is Test {
     function testOnlyBridgeCanMintAndBurn() public {
         uint256 amount = 1000 * TOKEN_DECIMALS;
         
-        // Attempt to mint from a non-bridge address should revert.
-        vm.prank(owner);
-        vm.expectRevert("Caller is not the bridge contract");
+        // Attempt to mint from a non-bridge or owner address should revert.
+        vm.prank(alice);
+        vm.expectRevert("Caller is not the bridge or owner contract");
         token.mint(alice, amount);
 
         // Minting from the designated bridge should succeed.
@@ -50,9 +58,9 @@ contract EvmBridgeTest is Test {
         token.mint(alice, amount);
         assertEq(token.balanceOf(alice), amount);
 
-        // Attempt to burn from a non-bridge address should revert.
-        vm.prank(owner);
-        vm.expectRevert("Caller is not the bridge contract");
+        // Attempt to burn from a non-bridge or owner address should revert.
+        vm.prank(alice);
+        vm.expectRevert("Caller is not the bridge or owner contract");
         token.burn(alice, amount);
 
         // Burning by the bridge should succeed.
