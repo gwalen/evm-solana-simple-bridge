@@ -10,6 +10,7 @@ artifacts/
 cache*
 typechain-types/
 
+deployments.json
 
 *.out
 .idea

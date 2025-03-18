@@ -3,7 +3,7 @@ const { ethers, upgrades } = hre;
 import { JsonRpcProvider } from "ethers";
 import { EvmBridge } from "../typechain-types"; // adjust path as needed
 import { keccak256, toUtf8Bytes } from "ethers";
-
+import * as fs from "fs";
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -19,9 +19,10 @@ export async function deployContracts() {
   const relayer = process.env.RELAYER;
   if (!relayer) throw new Error("RELAYER not set");
 
+  const alice = process.env.ALICE;
+  if (!alice) throw new Error("ALICE not set");
+
   // Optionally, use a custom RPC URL if provided, otherwise use Hardhat's default provider.
-  const rpcUrl = process.env.RPC_URL || "";
-  // const provider = rpcUrl ? new JsonRpcProvider(rpcUrl) : ethers.provider;
   const provider = ethers.provider;
 
   // Create a deployer wallet instance.
@@ -43,20 +44,22 @@ export async function deployContracts() {
   //   [owner, relayer]
   // );
   await evmBridge.waitForDeployment();
-  console.log("EvmBridge deployed at:", await evmBridge.getAddress());
+  const evmBridgeAddress = await evmBridge.getAddress();
+  console.log("EvmBridge deployed at:", evmBridgeAddress);
 
   // Similarly, deploy BridgeErc20 as a UUPS proxy.
   const BridgeErc20Factory = await ethers.getContractFactory("BridgeErc20", wallet);
   const token = (await upgrades.deployProxy(
     BridgeErc20Factory,
-    ["Test Token", "TT", owner, await evmBridge.getAddress()],
+    ["Test Token", "TT", owner, await evmBridgeAddress],
     {
       initializer: "initialize",
       kind: "uups",
     }
   ));
   await token.waitForDeployment();
-  console.log("BridgeErc20 deployed at:", await token.getAddress());
+  const tokenAddress = await token.getAddress();
+  console.log("BridgeErc20 deployed at:", tokenAddress);
 
   // Compute a sample foreign token identifier (using keccak256 hash of "FOREIGN_TOKEN")
   const foreignId = keccak256(toUtf8Bytes("FOREIGN_TOKEN"));
@@ -66,13 +69,19 @@ export async function deployContracts() {
   await txRegister.wait();
   console.log("Token registered with EvmBridge");
 
-  // test only
-  const txMint = await token.mint(relayer, 1 *10 **6);
+  // Mint tokens to alice for future use
+  const txMint = await token.mint(alice, 100 * 10**6);
   await txMint.wait();
 
-  console.log(await token.balanceOf(relayer));
+  console.log(await token.balanceOf(alice));
 
-  .. add alice wallet mint to her so we can later run her wallet with burnAndBridge to wait to event
+  // Write the deployed addresses to a deployments.json file
+  const deployments = {
+    evmBridge: evmBridgeAddress,
+    bridgeErc20: tokenAddress,
+  };
+  fs.writeFileSync("deployments.json", JSON.stringify(deployments, null, 2));
+  console.log("Deployed addresses saved to deployments.json");
 
   console.log("Deployment complete!");
 }
