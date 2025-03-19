@@ -1,21 +1,18 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../target/types/solana_node";
+import * as solanaNodeIdl from "../target/idl/solana_node.json";
 import { ALICE, MINT_DECIMALS, RELAYER } from "../tests/consts";
-import { Keypair, PublicKey } from "@solana/web3.js";
-import { airdrop, deriveConfigPda } from "../tests/utils";
+import { airdrop, createAnchorProvider, deriveConfigPda } from "../tests/utils";
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import * as fs from "fs";
-import path from "path";
-
 
 export async function initAccounts() {
 
   const provider = createAnchorProvider("http://127.0.0.1:8899");
+  const program = new Program(solanaNodeIdl as SolanaNode, provider);
   anchor.setProvider(provider)
   const baseWalletSolana = provider.wallet as anchor.Wallet;
-
-  const program = anchor.workspace.SolanaNode as Program<SolanaNode>;
 
   console.log("Program id: ", program.programId.toBase58());
   console.log("provider: ", provider.connection.rpcEndpoint);
@@ -94,27 +91,6 @@ export async function initAccounts() {
   fs.writeFileSync("deployments.json", JSON.stringify(deployments, null, 2));
   console.log("Deployed addresses saved to deployments.json");
 }
-
-export function createAnchorProvider(rpcUrl: string) {
-  const testKeyPath = path.join(__dirname, "../tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
-  const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
-  const privateKeySolanaParsed = JSON.parse(privateKeySolanaStr) as number[];
-  const solanaPrivateKey = new Uint8Array(privateKeySolanaParsed);
-  let solanaConnection = new anchor.web3.Connection(rpcUrl, "confirmed");
-
-  const solanaKeypair = Keypair.fromSecretKey(solanaPrivateKey);
-  const solanaAnchorWallet = new anchor.Wallet(solanaKeypair);
-
-  const provider = new anchor.AnchorProvider(
-    solanaConnection,
-    solanaAnchorWallet,
-    {
-      commitment: "confirmed"
-    }
-  );
-  return provider;
-}
-
 
 initAccounts()
   .then(() => process.exit(0))
