@@ -36,7 +36,13 @@ export async function appListen() {
   await registerEvmTokenOnSolana(evmTokenAddress, solanaTokenAddress);
 
   console.log("Starting Evm listeners...");
-  const evmListener = new EvmListener("ws://localhost:8545", evmBridgeAddress);
+  const evmListener = new EvmListener(
+    "ws://localhost:8545",
+    "http://127.0.0.1:8899",
+    evmBridgeAddress,
+    evmTokenAddress,
+    solanaTokenAddress
+  );
   evmListener.listenForBurnEvent();
   evmListener.listenForMintEvent();
 
