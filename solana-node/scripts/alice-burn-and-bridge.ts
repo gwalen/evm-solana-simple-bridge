@@ -69,10 +69,8 @@ export async function burnAndBridgeAliceTokens() {
   const alice = Keypair.generate();
   const mintAmountForAlice = 25 * 10 ** MINT_DECIMALS;
   console.log("alice address: ", alice.publicKey);
-  console.log("alice pk: ", alice.secretKey);
 
-  // console.log("OWNER address: ", OWNER.publicKey);
-  // console.log("OWNER pk: ", OWNER.secretKey);
+  console.log("RELAYER pk: ", RELAYER.secretKey);
 
   // TODO: maybe move this to seprate script like : init-data.ts
   await airdrop(provider.connection, alice.publicKey);
