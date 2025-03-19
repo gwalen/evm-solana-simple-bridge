@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../target/types/solana_node";
-import { OWNER, RELAYER } from "./consts";
+import { MINT_DECIMALS, OWNER, RELAYER } from "./consts";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { airdrop, deriveConfigPda, deriveForeignTokenPda, evmAddressTo32Bytes, sleep } from "./utils";
 import { assert } from "chai";
@@ -20,8 +20,6 @@ describe("solana-node", () => {
   const program = anchor.workspace.SolanaNode as Program<SolanaNode>;
   const firstMintOwner = Keypair.generate();
   const alice = Keypair.generate();
-
-  const MINT_DECIMALS = 6;
 
   let configPda: PublicKey;
   let mintAddress: PublicKey;

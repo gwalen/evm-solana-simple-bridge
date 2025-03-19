@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import { EvmListener } from "./evm-listener";
 import { BridgeErc20, BridgeErc20__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as fs from "fs";
-import {burnAndBridgeAliceTokens} from "../../evm-bridge/scripts/AliceBurnAndBridge"
+import {burnAndBridgeAliceTokens} from "../../evm-bridge/scripts/alice-burn-and-bridge"
 
 const EVM_BRIDGE_CONTRACT_ADDRESS = "0x663F3ad617193148711d28f5334eE4Ed07016602";
 
@@ -24,7 +24,7 @@ function deployEvmContracts(): Promise<void> {
     // Command to run Hardhat deploy script using npx
     const command = "npx";
     // Adjust the script path if necessary; here we assume the deploy script is at scripts/DeployHardhat.ts
-    const args = ["ts-node", "./scripts/DeployHardhat.ts"];
+    const args = ["ts-node", "./scripts/deploy-hardhat.ts"];
 
     // Spawn the process with the working directory set to the evm-bridge folder
     const deployProcess = spawn(command, args, {
@@ -49,11 +49,6 @@ export async function appListen() {
     console.log("Deploying Evm contracts...");
     await deployEvmContracts();
 
-    console.log("Current working directory:", process.cwd());
-    console.log("script directory:", __dirname);
-
-    // const filePath = path.join(__dirname, "../../evm-bridge/deployments.json");
-    // const deploymentsJson = fs.readFileSync(filePath, "utf-8");
     const deploymentsJson = fs.readFileSync("../evm-bridge/deployments.json", "utf-8");
     const deployments: EvmDeployments = JSON.parse(deploymentsJson);
 
