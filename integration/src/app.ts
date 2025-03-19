@@ -6,11 +6,14 @@ import { EvmListener } from "./evm-listener";
 import { BridgeErc20, BridgeErc20__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as fs from "fs";
 import { evmBurnAndBridgeAliceTokens } from "../../evm-bridge/scripts/alice-burn-and-bridge"
+import { registerSolanaTokenOnEvm } from "../../evm-bridge/scripts/register-solana-token"
 import { solanaBurnAndBridgeAliceTokens } from "../../solana-node/scripts/alice-burn-and-bridge"
-import { SolanaDeployments } from "../../solana-node/tests/utils"
+import { registerEvmTokenOnSolana } from "../../solana-node/scripts/register-evm-token"
+import { createAnchorProvider, SolanaDeployments } from "../../solana-node/tests/utils"
 import { EvmDeployments } from "../../evm-bridge/scripts/utils"
 import { SolanaListener } from "./solana-listener";
 import { MINT_DECIMALS as SOLANA_TOKEN_DECIMALS } from "../../solana-node/tests/consts";
+import { PublicKey } from "@solana/web3.js";
 
 const EVM_BRIDGE_CONTRACT_ADDRESS = "0x663F3ad617193148711d28f5334eE4Ed07016602";
 
@@ -20,7 +23,17 @@ export async function appListen() {
   let [solanaBridgeAddress, solanaTokenAddress] = await initializeSolana();
   console.log("Solana contracts deployed");
 
-  // TODO: register tokens on EVM and Solana side
+  const solanaTokenAddressAs32Bytes = "0x" + (new PublicKey(solanaTokenAddress)).toBuffer().toString("hex");
+  console.log("solanaTokenAddressAs32Bytes :", solanaTokenAddressAs32Bytes);
+
+  await registerSolanaTokenOnEvm(
+    evmBridgeAddress,
+    evmTokenAddress,
+    // solanaTokenAddressAs32Bytes,
+    (new PublicKey(solanaTokenAddress)).toBytes()
+  );
+
+  await registerEvmTokenOnSolana(evmTokenAddress, solanaTokenAddress);
 
   console.log("Starting Evm listeners...");
   const evmListener = new EvmListener("ws://localhost:8545", evmBridgeAddress);
