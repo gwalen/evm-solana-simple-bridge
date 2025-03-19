@@ -1,18 +1,17 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../target/types/solana_node";
-import { ALICE, MINT_DECIMALS, OWNER, RELAYER } from "../tests/consts";
+import { ALICE, MINT_DECIMALS, RELAYER } from "../tests/consts";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { airdrop, deriveConfigPda, deriveForeignTokenPda, evmAddressTo32Bytes, sleep } from "../tests/utils";
-import { assert } from "chai";
-import { createMint, getMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import { airdrop, deriveConfigPda } from "../tests/utils";
+import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import * as fs from "fs";
 import path from "path";
 
 
 export async function initAccounts() {
 
-  const provider = createAnchorProvider();
+  const provider = createAnchorProvider("http://127.0.0.1:8899");
   anchor.setProvider(provider)
   const baseWalletSolana = provider.wallet as anchor.Wallet;
 
@@ -24,8 +23,6 @@ export async function initAccounts() {
   const baseWalletSolBalance = await provider.connection.getBalance(baseWalletSolana.publicKey);
   console.log("Base wallet (signer) SOL address: ", baseWalletSolana.publicKey.toBase58());
   console.log("Base wallet (signer) SOL balance: ", baseWalletSolBalance);
-
-  ///
 
   const mintAmountForAlice = 25 * 10 ** MINT_DECIMALS;
   console.log("ALICE   address: ", ALICE.publicKey.toBase58());
@@ -79,6 +76,17 @@ export async function initAccounts() {
   const config = await program.account.config.fetch(deriveConfigPda(program.programId));
   console.log(config)
 
+  // give mint rights to the program
+  await program.methods
+    .takeTokenMintAuthority()
+    .accounts({
+      owner: baseWalletSolana.publicKey,
+      mintOwner: baseWalletSolana.publicKey,
+      tokenMint: mintAddress
+    })
+    .signers([baseWalletSolana.payer])
+    .rpc({ skipPreflight: true });
+
   const deployments = {
     solanaBridge: program.programId.toBase58(),
     solanaTokenAddress: mintAddress.toBase58(),
@@ -87,12 +95,12 @@ export async function initAccounts() {
   console.log("Deployed addresses saved to deployments.json");
 }
 
-export function createAnchorProvider() {
+export function createAnchorProvider(rpcUrl: string) {
   const testKeyPath = path.join(__dirname, "../tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
   const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
   const privateKeySolanaParsed = JSON.parse(privateKeySolanaStr) as number[];
   const solanaPrivateKey = new Uint8Array(privateKeySolanaParsed);
-  let solanaConnection = new anchor.web3.Connection("http://127.0.0.1:8899", "confirmed");
+  let solanaConnection = new anchor.web3.Connection(rpcUrl, "confirmed");
 
   const solanaKeypair = Keypair.fromSecretKey(solanaPrivateKey);
   const solanaAnchorWallet = new anchor.Wallet(solanaKeypair);

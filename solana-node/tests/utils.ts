@@ -3,6 +3,11 @@ import * as anchor from "@coral-xyz/anchor";
 
 export const AIRDROP_SOL_AMOUNT = 100 * LAMPORTS_PER_SOL;
 
+export interface SolanaDeployments {
+  solanaBridge: string,
+  solanaTokenAddress: string
+}
+
 export async function airdrop(connection: Connection, userPubkey: PublicKey) {
   const signature = await connection.requestAirdrop(userPubkey, AIRDROP_SOL_AMOUNT)
   const latestBlockHash = await connection.getLatestBlockhash();

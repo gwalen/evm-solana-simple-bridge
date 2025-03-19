@@ -2,7 +2,6 @@ cache
 lib
 node_modules
 out
-.env
 broadcast
 etherscan.json
 .DS_Store
