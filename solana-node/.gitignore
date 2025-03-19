@@ -5,5 +5,6 @@ target
 node_modules
 test-ledger
 .yarn
+.standalone_ledger
 
 .vscode/
