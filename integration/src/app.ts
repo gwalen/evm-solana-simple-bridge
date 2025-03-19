@@ -1,22 +1,20 @@
+import * as anchor from "@coral-xyz/anchor";
 import { spawn } from "child_process";
 import path from "path";
 import { ethers } from "ethers";
 import { EvmListener } from "./evm-listener";
 import { BridgeErc20, BridgeErc20__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as fs from "fs";
-import {burnAndBridgeAliceTokens} from "../../evm-bridge/scripts/alice-burn-and-bridge"
+import { evmBurnAndBridgeAliceTokens } from "../../evm-bridge/scripts/alice-burn-and-bridge"
+// import { solanaBurnAndBridgeAliceTokens } from "../../solana-node/scripts/alice-burn-and-bridge"
+import { solanaBurnAndBridgeAliceTokens } from "./alice-burn-and-bridge";
+
+import { SolanaDeployments } from "../../solana-node/tests/utils"
+import { EvmDeployments } from "../../evm-bridge/scripts/utils"
+import { SolanaListener } from "./solana-listener";
+import { MINT_DECIMALS as SOLANA_TOKEN_DECIMALS } from "../../solana-node/tests/consts";
 
 const EVM_BRIDGE_CONTRACT_ADDRESS = "0x663F3ad617193148711d28f5334eE4Ed07016602";
-
-interface EvmDeployments {
-  evmBridge: string;
-  evmTokenAddress: string;
-}
-
-interface SolanaDeployments {
-  solanaBridge: string,
-  solanaTokenAddress: string
-}
 
 export async function appListen() {
   let [evmBridgeAddress, evmTokenAddress] = await initializeEvm();
@@ -24,16 +22,28 @@ export async function appListen() {
   let [solanaBridgeAddress, solanaTokenAddress] = await initializeSolana();
   console.log("Solana contracts deployed");
 
+  // TODO: register tokens on EVM and Solana side
+
   console.log("Starting Evm listeners...");
   const evmListener = new EvmListener("ws://localhost:8545", evmBridgeAddress);
-  // Start listening for burn events
   evmListener.listenForBurnEvent();
-  // Start listening for mint events
   evmListener.listenForMintEvent();
 
+  console.log("Starting Solana listeners...");
+  const solanaListener = new SolanaListener("http://127.0.0.1:8899");
+  solanaListener.listenForBurnEvent();
+  solanaListener.listenForMintEvent();
 
-  // burn and bridge alice tokens
-  await burnAndBridgeAliceTokens(evmBridgeAddress, evmTokenAddress, 1000n);
+  await evmBurnAndBridgeAliceTokens(evmBridgeAddress, evmTokenAddress, 1000n);
+  await solanaBurnAndBridgeAliceTokens(new anchor.BN(1 * 10 ** SOLANA_TOKEN_DECIMALS));
+
+  // TODO: mint tokens on EVM on BurnEvent on Solana
+
+  // TODO: mint tokens on Solana on BurnEvent on EVM
+
+  // TODO: rename SolanaNode to SolanaBridge
+
+  // TODO: README : how to install all components and build / test unit / test integration
 }
 
 /** Helpers **/

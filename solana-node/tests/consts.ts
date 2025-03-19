@@ -5,6 +5,6 @@ dotenv.config();
 
 export const MINT_DECIMALS = 6;
 
-export const ALICE = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.ALICE_PRIVATE_KEY!) as number[]));
-export const OWNER = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.OWNER_PRIVATE_KEY!) as number[]));
-export const RELAYER = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.RELAYER_PRIVATE_KEY!) as number[]));
+export const ALICE = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.ALICE_PRIVATE_KEY_SOLANA!) as number[]));
+export const OWNER = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.OWNER_PRIVATE_KEY_SOLANA!) as number[]));
+export const RELAYER = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.RELAYER_PRIVATE_KEY_SOLANA!) as number[]));

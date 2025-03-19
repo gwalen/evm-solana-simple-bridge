@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 import { EvmBridge, EvmBridge__factory, BridgeErc20, BridgeErc20__factory } from "../typechain-types";
 
 
-export async function burnAndBridgeAliceTokens(evmBridgeAddress: string, tokenAddress: string, amount: bigint) {
+export async function evmBurnAndBridgeAliceTokens(evmBridgeAddress: string, tokenAddress: string, amount: bigint) {
   dotenv.config();
   const alicePrivateKey = process.env.ALICE_PRIVATE_KEY;
   if (!alicePrivateKey) throw new Error("ALICE_PRIVATE_KEY not set");
