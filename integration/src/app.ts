@@ -6,9 +6,7 @@ import { EvmListener } from "./evm-listener";
 import { BridgeErc20, BridgeErc20__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as fs from "fs";
 import { evmBurnAndBridgeAliceTokens } from "../../evm-bridge/scripts/alice-burn-and-bridge"
-// import { solanaBurnAndBridgeAliceTokens } from "../../solana-node/scripts/alice-burn-and-bridge"
-import { solanaBurnAndBridgeAliceTokens } from "./alice-burn-and-bridge";
-
+import { solanaBurnAndBridgeAliceTokens } from "../../solana-node/scripts/alice-burn-and-bridge"
 import { SolanaDeployments } from "../../solana-node/tests/utils"
 import { EvmDeployments } from "../../evm-bridge/scripts/utils"
 import { SolanaListener } from "./solana-listener";

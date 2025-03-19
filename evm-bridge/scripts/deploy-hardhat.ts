@@ -10,8 +10,8 @@ dotenv.config();
 
 export async function deployContracts() {
   // Read environment variables
-  const deployerPrivateKey = process.env.OWNER_PRIVATE_KEY;
-  if (!deployerPrivateKey) throw new Error("OWNER_PRIVATE_KEY not set");
+  const deployerPrivateKey = process.env.OWNER_PRIVATE_KEY_EVM;
+  if (!deployerPrivateKey) throw new Error("OWNER_PRIVATE_KEY_EVM not set");
 
   const owner = process.env.OWNER;
   if (!owner) throw new Error("OWNER not set");

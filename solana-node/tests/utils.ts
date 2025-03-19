@@ -1,5 +1,7 @@
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Connection, LAMPORTS_PER_SOL, Keypair, PublicKey } from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
+import * as fs from "fs";
+import path from "path";
 
 export const AIRDROP_SOL_AMOUNT = 100 * LAMPORTS_PER_SOL;
 
@@ -47,4 +49,24 @@ export function deriveForeignTokenPda(programId: PublicKey, foreignAddress: numb
 
 export const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function createAnchorProvider(rpcUrl: string) {
+  const testKeyPath = path.join(__dirname, "./keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
+  const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
+  const privateKeySolanaParsed = JSON.parse(privateKeySolanaStr) as number[];
+  const solanaPrivateKey = new Uint8Array(privateKeySolanaParsed);
+  let solanaConnection = new anchor.web3.Connection(rpcUrl, "confirmed");
+
+  const solanaKeypair = Keypair.fromSecretKey(solanaPrivateKey);
+  const solanaAnchorWallet = new anchor.Wallet(solanaKeypair);
+
+  const provider = new anchor.AnchorProvider(
+    solanaConnection,
+    solanaAnchorWallet,
+    {
+      commitment: "confirmed"
+    }
+  );
+  return provider;
 }

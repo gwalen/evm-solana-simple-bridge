@@ -2,23 +2,22 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../target/types/solana_node";
 import * as solanaNodeIdl from "../target/idl/solana_node.json";
-import { ALICE, MINT_DECIMALS } from "../tests/consts";
-import { Keypair, PublicKey } from "@solana/web3.js";
-import { SolanaDeployments } from "../tests/utils";
+import { ALICE } from "../tests/consts";
+import { PublicKey } from "@solana/web3.js";
+import { createAnchorProvider, SolanaDeployments } from "../tests/utils";
 import * as fs from "fs";
 import path from "path";
-// import { createAnchorProvider } from "./init-accounts";
 
 
-export async function solanaBurnAndBridgeAliceTokens(amount: anchor.BN) {
-  
-  // NOTE: this script will be run from integration tests and not in solana-node context
-  //       there fore we must start it with SolanaNode not related to local workspace
-
+export async function solanaBurnAndBridgeAliceTokens(amount: anchor.BN) { 
+  /**
+   * NOTE: this script will be run from integration tests and not in solana-node context
+   *       therefore we must start it with SolanaNode not related to local workspace.
+   *       We can not use: const program = anchor.workspace.SolanaNode as Program<SolanaNode>;
+   *       as it refers to anchor workspace.
+   */
   const provider = createAnchorProvider("http://127.0.0.1:8899");
   const program = new Program(solanaNodeIdl as SolanaNode, provider);
-
-  console.log("AAA ", await provider.connection.getLatestBlockhash());
 
   const deploymentsJsonPath = path.resolve(__dirname, "../deployments.json");
   const deploymentsJson = fs.readFileSync(deploymentsJsonPath, "utf-8");
@@ -44,28 +43,6 @@ export async function solanaBurnAndBridgeAliceTokens(amount: anchor.BN) {
     .catch(e => console.error(e));
 
 }
-
-function createAnchorProvider(rpcUrl: string) {
-  const testKeyPath = path.join(__dirname, "../tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
-  const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
-  console.log("XXX 1 ", privateKeySolanaStr);
-  const privateKeySolanaParsed = JSON.parse(privateKeySolanaStr) as number[];
-  const solanaPrivateKey = new Uint8Array(privateKeySolanaParsed);
-  let solanaConnection = new anchor.web3.Connection(rpcUrl, "confirmed");
-
-  const solanaKeypair = Keypair.fromSecretKey(solanaPrivateKey);
-  const solanaAnchorWallet = new anchor.Wallet(solanaKeypair);
-
-  const provider = new anchor.AnchorProvider(
-    solanaConnection,
-    solanaAnchorWallet,
-    {
-      commitment: "confirmed"
-    }
-  );
-  return provider;
-}
-
 
 // solanaBurnAndBridgeAliceTokens(new anchor.BN(1 * 10 ** MINT_DECIMALS))
 //   .then(() => process.exit(0))
