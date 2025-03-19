@@ -78,7 +78,7 @@ export async function deployContracts() {
   // Write the deployed addresses to a deployments.json file
   const deployments = {
     evmBridge: evmBridgeAddress,
-    bridgeErc20: tokenAddress,
+    evmTokenAddress: tokenAddress,
   };
   fs.writeFileSync("deployments.json", JSON.stringify(deployments, null, 2));
   console.log("Deployed addresses saved to deployments.json");
