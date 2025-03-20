@@ -4,7 +4,7 @@ import { SolanaBridge } from "../target/types/solana_bridge";
 import { MINT_DECIMALS, OWNER, RELAYER } from "./consts";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { airdrop, deriveConfigPda, deriveForeignTokenPda, evmAddressTo32Bytes, sleep } from "./utils";
-import { assert } from "chai";
+import * as assert from "assert";
 import { createMint, getMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 
 
@@ -15,8 +15,6 @@ describe("solana-bridge", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const baseWallet = provider.wallet as anchor.Wallet;
-
   const program = anchor.workspace.SolanaBridge as Program<SolanaBridge>;
   const firstMintOwner = Keypair.generate();
   const alice = Keypair.generate();
@@ -24,7 +22,6 @@ describe("solana-bridge", () => {
   let configPda: PublicKey;
   let mintAddress: PublicKey;
   let aliceTokenAta: PublicKey;
-
 
   it("Airdrop actors", async () => {
     await airdrop(provider.connection, OWNER.publicKey);
@@ -110,7 +107,7 @@ describe("solana-bridge", () => {
 
   it("Burn and bridge tokens", async () => {
     const amountToBridge = new anchor.BN(5 * 10 ** MINT_DECIMALS);
-    
+
     const aliceTokenAmountBefore = Number((await provider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount);
     const mintSupplyBefore = (await getMint(provider.connection, mintAddress)).supply;
     let burnEventAmount = new anchor.BN(0);
@@ -136,12 +133,27 @@ describe("solana-bridge", () => {
     assert.equal(burnEventAmount.toNumber(), amountToBridge.toNumber());
   });
 
-
-  it("Register foreign token", async () =>{
+  it("Only owner can register foreign token", async () => {
     const evmAddressAs32Bytes = evmAddressTo32Bytes(USDC_ETHEREUM_MAINNET);
 
+    const registerForeignTokenPromise = program.methods
+      .registerForeignToken(evmAddressAs32Bytes)
+      .accounts({
+        owner: alice.publicKey,
+        localMint: mintAddress
+      })
+      .signers([alice])
+      .rpc({ skipPreflight: true });
+
+    assert.rejects(
+      registerForeignTokenPromise,
+      /Invalid Owner/
+    );
+  });
+
+  it("Register foreign token", async () => {
+    const evmAddressAs32Bytes = evmAddressTo32Bytes(USDC_ETHEREUM_MAINNET);
     const foreignTokenPda = deriveForeignTokenPda(program.programId, evmAddressAs32Bytes);
-    // console.log("foreignTokenPda", foreignTokenPda.toBase58());
 
     await program.methods
       .registerForeignToken(evmAddressAs32Bytes)
@@ -153,14 +165,72 @@ describe("solana-bridge", () => {
       .rpc({ skipPreflight: true });
 
     const foreignTokenAccount = await program.account.foreignToken.fetch(foreignTokenPda);
-    
+
     assert.equal(mintAddress.toBase58(), foreignTokenAccount.localAddress.toBase58());
     assert.deepEqual(evmAddressAs32Bytes, foreignTokenAccount.foreignAddress);
   });
 
+  it("Only relayer can mint tokens", async () => {
+    const evmAddressAs32Bytes = evmAddressTo32Bytes(USDC_ETHEREUM_MAINNET);
+
+    const mintAndBridgePromise = program.methods
+      .mintAndBridge(evmAddressAs32Bytes, new anchor.BN(5 * 10 ** MINT_DECIMALS))
+      .accounts({
+        relayer: RELAYER.publicKey,
+        tokenReceiver: alice.publicKey,
+        tokenMint: mintAddress
+      })
+      .signers([alice])
+      .rpc({ skipPreflight: true });
+
+    assert.rejects(
+      mintAndBridgePromise,
+      /Invalid Relayer/
+    );
+  });
+
+  it("Can mint only registered tokens", async () => {
+    const evmAddressAs32Bytes = evmAddressTo32Bytes("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
+
+    const mintAndBridgePromise = program.methods
+      .mintAndBridge(evmAddressAs32Bytes, new anchor.BN(5 * 10 ** MINT_DECIMALS))
+      .accounts({
+        relayer: RELAYER.publicKey,
+        tokenReceiver: alice.publicKey,
+        tokenMint: mintAddress
+      })
+      .signers([RELAYER])
+      .rpc({ skipPreflight: true });
+
+    assert.rejects(mintAndBridgePromise);
+  });
+
+  it("Token mint must be owned by configPda", async () => {
+    const evmAddressAs32Bytes = evmAddressTo32Bytes(USDC_ETHEREUM_MAINNET);
+
+    const fakeMintAddress = await createMint(
+      provider.connection,
+      OWNER,
+      firstMintOwner.publicKey, // mint authority
+      firstMintOwner.publicKey, // Freeze authority
+      MINT_DECIMALS
+    );
+
+    const mintAndBridgePromise = program.methods
+      .mintAndBridge(evmAddressAs32Bytes, new anchor.BN(5 * 10 ** MINT_DECIMALS))
+      .accounts({
+        relayer: RELAYER.publicKey,
+        tokenReceiver: alice.publicKey,
+        tokenMint: fakeMintAddress
+      })
+      .signers([RELAYER])
+      .rpc({ skipPreflight: true });
+
+    assert.rejects(mintAndBridgePromise);
+  });
+
   it("Mint and bridge tokens", async () => {
     const amountToBridge = new anchor.BN(5 * 10 ** MINT_DECIMALS);
-    
     const aliceTokenAmountBefore = Number((await provider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount);
     const mintSupplyBefore = (await getMint(provider.connection, mintAddress)).supply;
 
@@ -169,9 +239,8 @@ describe("solana-bridge", () => {
     let eventTokenMint = PublicKey.default;
 
     const evmAddressAs32Bytes = evmAddressTo32Bytes(USDC_ETHEREUM_MAINNET);
-    const foreignTokenPda = deriveForeignTokenPda(program.programId, evmAddressAs32Bytes);
 
-    const listenerMyEvent = program.addEventListener('mintEvent', (event, slot) => {
+    program.addEventListener('mintEvent', (event, slot) => {
       eventMintAmount = event.amount;
       eventTokenOwner = event.tokenOwner;
       eventTokenMint = event.tokenMint;
