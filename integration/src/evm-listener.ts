@@ -90,7 +90,7 @@ export class EvmListener {
   async mintTokensToSolana(amountToMint: number) {
     const evmAddressAs32Bytes = evmAddressTo32Bytes(this.evmTokenAddress);
 
-    ////
+    //// TODO: this is just for testing remove reading the balances
     const aliceTokenAta = (await getOrCreateAssociatedTokenAccount(
       this.solanaProvider.connection,
       ALICE,  // payer
