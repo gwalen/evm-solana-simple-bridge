@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../target/types/solana_node";
 import * as solanaNodeIdl from "../target/idl/solana_node.json";
-import { ALICE } from "../tests/consts";
+import { ALICE, SOLANA_RPC_URL } from "../tests/consts";
 import { PublicKey } from "@solana/web3.js";
 import { createAnchorProvider, SolanaDeployments } from "../tests/utils";
 import * as fs from "fs";
@@ -16,7 +16,7 @@ export async function solanaBurnAndBridgeAliceTokens(amount: anchor.BN) {
    *       We can not use: const program = anchor.workspace.SolanaNode as Program<SolanaNode>;
    *       as it refers to anchor workspace.
    */
-  const provider = createAnchorProvider("http://127.0.0.1:8899");
+  const provider = createAnchorProvider(SOLANA_RPC_URL);
   const program = new Program(solanaNodeIdl as SolanaNode, provider);
 
   const deploymentsJsonPath = path.resolve(__dirname, "../deployments.json");

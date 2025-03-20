@@ -1,27 +1,30 @@
 import * as anchor from "@coral-xyz/anchor";
 import { spawn } from "child_process";
 import path from "path";
-import { ethers } from "ethers";
 import { EvmListener } from "./evm-listener";
-import { BridgeErc20, BridgeErc20__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as fs from "fs";
 import { evmBurnAndBridgeAliceTokens } from "../../evm-bridge/scripts/alice-burn-and-bridge"
 import { registerSolanaTokenOnEvm } from "../../evm-bridge/scripts/register-solana-token"
 import { solanaBurnAndBridgeAliceTokens } from "../../solana-node/scripts/alice-burn-and-bridge"
 import { registerEvmTokenOnSolana } from "../../solana-node/scripts/register-evm-token"
-import { createAnchorProvider, SolanaDeployments } from "../../solana-node/tests/utils"
+import { SolanaDeployments } from "../../solana-node/tests/utils"
 import { EvmDeployments } from "../../evm-bridge/scripts/utils"
 import { SolanaListener } from "./solana-listener";
 import { MINT_DECIMALS as SOLANA_TOKEN_DECIMALS } from "../../solana-node/tests/consts";
 import { PublicKey } from "@solana/web3.js";
 
-const EVM_BRIDGE_CONTRACT_ADDRESS = "0x663F3ad617193148711d28f5334eE4Ed07016602";
 
 export async function appListen() {
   const evmRelayerPrivateKey = process.env.RELAYER_PRIVATE_KEY_EVM;
   if (!evmRelayerPrivateKey) throw new Error("RELAYER_PRIVATE_KEY_EVM not set");
   const aliceRelayerPrivateKey = process.env.ALICE_PRIVATE_KEY_EVM;
   if (!aliceRelayerPrivateKey) throw new Error("ALICE_PRIVATE_KEY_EVM not set");
+  const solanaRpcUrl = process.env.SOLANA_RPC_URL;
+  if (!solanaRpcUrl) throw new Error("SOLANA_RPC_URL not set");
+  const evmRpcUrl = process.env.EVM_RPC_URL;
+  if (!evmRpcUrl) throw new Error("EVM_RPC_URL not set");
+  const evmWsRpcUrl = process.env.EVM_WS_RPC_URL;
+  if (!evmWsRpcUrl) throw new Error("EVM_WS_RPC_URL not set");
 
   let [evmBridgeAddress, evmTokenAddress] = await initializeEvm();
   console.log("Evm contracts deployed");
@@ -34,7 +37,6 @@ export async function appListen() {
   await registerSolanaTokenOnEvm(
     evmBridgeAddress,
     evmTokenAddress,
-    // solanaTokenAddressAs32Bytes,
     (new PublicKey(solanaTokenAddress)).toBytes()
   );
 
@@ -42,8 +44,8 @@ export async function appListen() {
 
   console.log("Starting Evm listeners...");
   const evmListener = new EvmListener(
-    "ws://localhost:8545",
-    "http://127.0.0.1:8899",
+    evmWsRpcUrl,
+    solanaRpcUrl,
     evmBridgeAddress,
     solanaTokenAddress
   );
@@ -52,8 +54,8 @@ export async function appListen() {
 
   console.log("Starting Solana listeners...");
   const solanaListener = new SolanaListener(
-    "http://localhost:8545", // TODO: move this to .env
-    "http://127.0.0.1:8899",
+    evmRpcUrl,
+    solanaRpcUrl,
     evmBridgeAddress,
     evmTokenAddress,
     aliceRelayerPrivateKey,

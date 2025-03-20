@@ -7,8 +7,10 @@ export async function evmBurnAndBridgeAliceTokens(evmBridgeAddress: string, toke
   dotenv.config();
   const alicePrivateKey = process.env.ALICE_PRIVATE_KEY_EVM;
   if (!alicePrivateKey) throw new Error("ALICE_PRIVATE_KEY_EVM not set");
+  const evmRpcUrl = process.env.EVM_RPC_URL;
+  if (!evmRpcUrl) throw new Error("EVM_RPC_URL not set");
 
-  const provider = new ethers.JsonRpcProvider("http://localhost:8545");
+  const provider = new ethers.JsonRpcProvider(evmRpcUrl);
   const wallet = new ethers.Wallet(alicePrivateKey, provider);
 
   const evmBridge: EvmBridge = EvmBridge__factory.connect(evmBridgeAddress, wallet);

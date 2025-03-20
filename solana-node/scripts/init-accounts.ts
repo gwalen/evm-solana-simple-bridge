@@ -2,14 +2,14 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../target/types/solana_node";
 import * as solanaNodeIdl from "../target/idl/solana_node.json";
-import { ALICE, MINT_DECIMALS, RELAYER } from "../tests/consts";
+import { ALICE, MINT_DECIMALS, RELAYER, SOLANA_RPC_URL } from "../tests/consts";
 import { airdrop, createAnchorProvider, deriveConfigPda } from "../tests/utils";
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import * as fs from "fs";
 
 export async function initAccounts() {
 
-  const provider = createAnchorProvider("http://127.0.0.1:8899");
+  const provider = createAnchorProvider(SOLANA_RPC_URL);
   const program = new Program(solanaNodeIdl as SolanaNode, provider);
   anchor.setProvider(provider)
   const baseWalletSolana = provider.wallet as anchor.Wallet;

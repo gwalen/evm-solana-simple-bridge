@@ -12,8 +12,10 @@ export async function registerSolanaTokenOnEvm(
   dotenv.config();
   const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY_EVM;
   if (!ownerPrivateKey) throw new Error("OWNER_PRIVATE_KEY_EVM not set");
+  const evmRpcUrl = process.env.EVM_RPC_URL;
+  if (!evmRpcUrl) throw new Error("EVM_RPC_URL not set");
 
-  const provider = new ethers.JsonRpcProvider("http://localhost:8545");
+  const provider = new ethers.JsonRpcProvider(evmRpcUrl);
   const wallet = new ethers.Wallet(ownerPrivateKey, provider);
 
   const evmBridge: EvmBridge = EvmBridge__factory.connect(evmBridgeAddress, wallet);
