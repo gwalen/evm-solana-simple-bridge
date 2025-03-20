@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use crate::{instructions::mint_and_bridge::MintAndBridge, utils::events::MintEvent, state::config::Config};
 use anchor_spl::token::{self};
 
+/// For documentation, refer to `lib.rs`.  
 pub fn handle(
     ctx: Context<MintAndBridge>, 
     // used in MintAndBridge constraints check for ForeignToken pda
