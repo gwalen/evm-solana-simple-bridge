@@ -11,7 +11,7 @@ pub struct MintAndBridge<'info> {
     pub relayer: Signer<'info>,
 
     // #[account(mut)]
-    /// CHECK: wallet that is the receiver // TODO: this could be spoofed by malicious relayer but to verify it we would need full message signature verification
+    /// CHECK: wallet that is the receiver
     pub token_receiver: UncheckedAccount<'info>,
 
     #[account(
