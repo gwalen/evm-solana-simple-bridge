@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { SolanaNode } from "../../solana-node/target/types/solana_node";
-import * as solanaNodeIdl from "../../solana-node/target/idl/solana_node.json";
+import { SolanaBridge } from "../../solana-bridge/target/types/solana_bridge";
+import * as solanaBridgeIdl from "../../solana-bridge/target/idl/solana_bridge.json";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import * as fs from "fs";
 import path from "path";
@@ -13,7 +13,7 @@ export class SolanaListener {
   // we do not need to pass solanaBridgeAddress as it is a part of IDL
   evmBridgeAddress: string;
   evmProvider: ethers.JsonRpcProvider;
-  program: anchor.Program<SolanaNode>;
+  program: anchor.Program<SolanaBridge>;
   solanaProvider: anchor.AnchorProvider;
   evmBridge: EvmBridge;
   evmToken: BridgeErc20;
@@ -34,7 +34,7 @@ export class SolanaListener {
 
     this.evmBridgeAddress = evmBridgeAddress;
     this.solanaProvider = this.createAnchorProvider(solanaRpcUrl);
-    this.program = new Program(solanaNodeIdl as SolanaNode, this.solanaProvider);
+    this.program = new Program(solanaBridgeIdl as SolanaBridge, this.solanaProvider);
 
     this.evmBridge = EvmBridge__factory.connect(evmBridgeAddress, this.evmRelayerWallet);
     this.evmToken = BridgeErc20__factory.connect(evmTokenAddress, this.evmRelayerWallet);
@@ -81,7 +81,7 @@ export class SolanaListener {
   }
 
   createAnchorProvider(rpcUrl: string) {
-    const testKeyPath = path.join(__dirname, "../../solana-node/tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
+    const testKeyPath = path.join(__dirname, "../../solana-bridge/tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
     const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
     const privateKeySolanaParsed = JSON.parse(privateKeySolanaStr) as number[];
     const solanaPrivateKey = new Uint8Array(privateKeySolanaParsed);
