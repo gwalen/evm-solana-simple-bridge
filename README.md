@@ -126,6 +126,8 @@ The integration tests simulate a full cross-chain scenario:
 
 ### Running Integration Tests
 
+Notice that this test provides extensive logging to help visualize what is happening under the hood.
+
 1. **Install Project Dependencies (from the project root)**
 ```sh
 yarn install
