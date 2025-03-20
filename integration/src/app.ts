@@ -45,7 +45,6 @@ export async function appListen() {
     "ws://localhost:8545",
     "http://127.0.0.1:8899",
     evmBridgeAddress,
-    evmTokenAddress,
     solanaTokenAddress
   );
   evmListener.listenForBurnEvent();
@@ -57,7 +56,6 @@ export async function appListen() {
     "http://127.0.0.1:8899",
     evmBridgeAddress,
     evmTokenAddress,
-    solanaTokenAddress,
     aliceRelayerPrivateKey,
     evmRelayerPrivateKey,
   );

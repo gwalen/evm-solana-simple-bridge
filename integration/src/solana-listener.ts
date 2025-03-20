@@ -2,12 +2,9 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../../solana-node/target/types/solana_node";
 import * as solanaNodeIdl from "../../solana-node/target/idl/solana_node.json";
-import { ALICE, MINT_DECIMALS, RELAYER } from "../../solana-node/tests/consts";
 import { Keypair, PublicKey } from "@solana/web3.js";
-// import { createAnchorProvider } from "../../solana-node/scripts/init-accounts";
 import * as fs from "fs";
 import path from "path";
-
 import { ethers } from "ethers";
 import { BridgeErc20, BridgeErc20__factory, EvmBridge, EvmBridge__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 
@@ -18,8 +15,6 @@ export class SolanaListener {
   evmProvider: ethers.JsonRpcProvider;
   program: anchor.Program<SolanaNode>;
   solanaProvider: anchor.AnchorProvider;
-  // evmTokenAddress: string;
-  solanaTokenAddress: string;
   evmBridge: EvmBridge;
   evmToken: BridgeErc20;
   evmRelayerWallet: ethers.Wallet;
@@ -30,7 +25,6 @@ export class SolanaListener {
     solanaRpcUrl: string, 
     evmBridgeAddress: string,
     evmTokenAddress: string,
-    solanaTokenAddress: string,
     alicePrivateKey: string,
     relayerPrivateKey: string
   ) {
@@ -41,8 +35,6 @@ export class SolanaListener {
     this.evmBridgeAddress = evmBridgeAddress;
     this.solanaProvider = this.createAnchorProvider(solanaRpcUrl);
     this.program = new Program(solanaNodeIdl as SolanaNode, this.solanaProvider);
-    // this.evmTokenAddress = evmTokenAddress;
-    this.solanaTokenAddress = solanaTokenAddress;
 
     this.evmBridge = EvmBridge__factory.connect(evmBridgeAddress, this.evmRelayerWallet);
     this.evmToken = BridgeErc20__factory.connect(evmTokenAddress, this.evmRelayerWallet);
@@ -61,7 +53,6 @@ export class SolanaListener {
   }
 
   public async listenForBurnEvent(): Promise<void> {
-    // const evmBridge: EvmBridge = EvmBridge__factory.connect(this.evmBridgeAddress, this.evmProvider);
     
     this.program.addEventListener('burnEvent', async (event, slot) => {
       console.log(">> SOLANA << BurnEvent emitted:");
@@ -69,24 +60,24 @@ export class SolanaListener {
       console.log("Token Owner:", event.tokenOwner.toBase58());
       console.log("Amount:", event.amount.toNumber());
 
-      await this.mintTokensToEvm(event.amount.toNumber());
+      await this.mintTokensToEvm(event.amount.toNumber(), event.tokenMint);
     });
 
     console.log(">> SOLANA << Listening for BurnEvent events...");
   }
 
-  async mintTokensToEvm(amountToMint: number) {
+  async mintTokensToEvm(amountToMint: number, solanaToken: PublicKey) {
     console.log("Alice (receiver) wallet address:, ", this.evmAliceWallet.address)
 
     const tx = await this.evmBridge.mintAndBridge(
       this.evmToken, 
-      (new PublicKey(this.solanaTokenAddress)).toBytes(), // TODO: check if you can use here event.tokenMint (better !!)
+      solanaToken.toBytes(),
       this.evmAliceWallet.address,
       amountToMint
     );
 
     await tx.wait();
-    console.log("Transaction Mint to EVM sent. Hash:", tx.hash);
+    console.log("Mint Transaction to EVM sent. Hash:", tx.hash);
   }
 
   createAnchorProvider(rpcUrl: string) {
