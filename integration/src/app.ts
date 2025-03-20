@@ -13,10 +13,6 @@ import { PublicKey } from "@solana/web3.js";
 import { OffChainRelayer } from "./off-chain-relayer";
 import { exit } from "process";
 
-// Helper function to add delays
-function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 // Spawn Anvil for the EVM test network in the ../evm-bridge directory
 // redirecting stdout and stderr to ".anvil_log
@@ -61,7 +57,6 @@ async function spawnSolanaValidator(): Promise<ChildProcess> {
   return validatorProcess;
 }
 
-/** Existing helper functions remain unchanged */
 function deployEvmContracts(): Promise<void> {
   return new Promise((resolve, reject) => {
     const evmBridgeDir = path.resolve(__dirname, "../../evm-bridge");
@@ -122,7 +117,6 @@ async function initializeSolana(): Promise<[string, string]> {
   return [deployments.solanaBridge, deployments.solanaTokenAddress];
 }
 
-/** Main function remains the same except for the listener and network spawning refactor */
 export async function appListen() {
   // Spawn test blockchain networks
   const anvilProcess = await spawnAnvil();
@@ -155,7 +149,6 @@ export async function appListen() {
     );
     await registerEvmTokenOnSolana(evmTokenAddress, solanaTokenAddress);
   
-    // Initialize and start the off-chain relayer that contains both listeners.
     const offChainRelayer = new OffChainRelayer(
       evmWsRpcUrl,
       solanaRpcUrl,
