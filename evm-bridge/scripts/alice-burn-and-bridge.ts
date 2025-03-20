@@ -18,7 +18,6 @@ export async function evmBurnAndBridgeAliceTokens(evmBridgeAddress: string, toke
 
   const tx = await evmBridge.burnAndBridge(token, amount);
 
-  // Wait for the transaction to be mined.
   await tx.wait();
-  console.log("Transaction sent. Hash:", tx.hash);
+  // console.log("Evm burn transaction:", tx.hash);
 }

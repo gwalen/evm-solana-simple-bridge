@@ -63,9 +63,7 @@ describe("integration-test", () => {
 
   it("initialize contract on Evm and Solana", async () => {
     [evmBridgeAddress, evmTokenAddress] = await initializeEvm();
-    console.log("Evm contracts deployed");
     [solanaBridgeAddress, solanaTokenAddress] = await initializeSolana();
-    console.log("Solana contracts deployed");
 
     try {
       solanaProvider = createAnchorProvider(solanaRpcUrl);

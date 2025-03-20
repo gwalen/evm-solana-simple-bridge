@@ -43,31 +43,31 @@ export class SolanaListener {
   public async listenForMintEvent(): Promise<void> {
     
     this.program.addEventListener('mintEvent', (event, slot) => {
-      console.log(">> SOLANA << MintEvent emitted:");
-      console.log("Token Mint Address:", event.tokenMint.toBase58());
-      console.log("Token Owner:", event.tokenOwner.toBase58());
-      console.log("Amount:", event.amount.toNumber());
+      console.log(">> SOLANA - MintEvent emitted:");
+      console.log("   Token Mint Address:", event.tokenMint.toBase58());
+      console.log("   Token Owner:", event.tokenOwner.toBase58());
+      console.log("   Amount:", event.amount.toNumber());
     });
 
-    console.log(">> SOLANA << Listening for MintEvent events...");
+    console.log(">> SOLANA - Listening for MintEvent events...");
   }
 
   public async listenForBurnEvent(): Promise<void> {
     
     this.program.addEventListener('burnEvent', async (event, slot) => {
-      console.log(">> SOLANA << BurnEvent emitted:");
-      console.log("Token Mint Address:", event.tokenMint.toBase58());
-      console.log("Token Owner:", event.tokenOwner.toBase58());
-      console.log("Amount:", event.amount.toNumber());
+      console.log(">> SOLANA - BurnEvent emitted:");
+      console.log("   Token Mint Address:", event.tokenMint.toBase58());
+      console.log("   Token Owner:", event.tokenOwner.toBase58());
+      console.log("   Amount:", event.amount.toNumber());
 
       await this.mintTokensToEvm(event.amount.toNumber(), event.tokenMint);
     });
 
-    console.log(">> SOLANA << Listening for BurnEvent events...");
+    console.log(">> SOLANA - Listening for BurnEvent events...");
   }
 
   async mintTokensToEvm(amountToMint: number, solanaToken: PublicKey) {
-    console.log("Alice (receiver) wallet address:, ", this.evmAliceWallet.address)
+    // console.log("Alice (receiver) wallet address:, ", this.evmAliceWallet.address)
 
     const tx = await this.evmBridge.mintAndBridge(
       this.evmToken, 
@@ -77,7 +77,7 @@ export class SolanaListener {
     );
 
     await tx.wait();
-    console.log("Mint Transaction to EVM sent. Hash:", tx.hash);
+    console.log("Mint tokens to EVM tx: ", tx.hash);
   }
 
   createAnchorProvider(rpcUrl: string) {

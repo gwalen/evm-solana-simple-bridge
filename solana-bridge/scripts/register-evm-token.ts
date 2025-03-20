@@ -33,5 +33,5 @@ export async function registerEvmTokenOnSolana(
     .rpc() 
     .catch(e => console.error(e));
 
-  console.log("Tx register token: ", tx);  
+  console.log("Register Evm token on Solana tx: ", tx);  
 }
