@@ -25,13 +25,6 @@ export async function solanaBurnAndBridgeAliceTokens(amount: anchor.BN) {
 
   const mintAddress = new PublicKey(deployments.solanaTokenAddress);
 
-  // const aliceTokenAta = (await getOrCreateAssociatedTokenAccount(
-  //   provider.connection,
-  //   ALICE,  // payer
-  //   mintAddress,
-  //   ALICE.publicKey, // ata owner
-  // )).address;
-
   await program.methods
     .burnAndBridge(amount)
     .accounts({
