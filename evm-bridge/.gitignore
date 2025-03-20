@@ -9,6 +9,7 @@ artifacts/
 cache*
 typechain-types/
 
+.anvil_log
 deployments.json
 
 *.out

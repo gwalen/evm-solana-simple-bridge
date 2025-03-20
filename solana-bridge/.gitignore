@@ -6,6 +6,8 @@ node_modules
 test-ledger
 .yarn
 .standalone_ledger
+
 deployments.json
+.solana_validator_log
 
 .vscode/
