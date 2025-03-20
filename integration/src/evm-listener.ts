@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { BridgeErc20, BridgeErc20__factory, EvmBridge, EvmBridge__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
+import { EvmBridge, EvmBridge__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNode } from "../../solana-node/target/types/solana_node";
@@ -15,33 +15,29 @@ import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 export class EvmListener {
   evmBridgeAddress: string;
   evmProvider: ethers.WebSocketProvider;
-  program: anchor.Program<SolanaNode>;
+  evmBridge: EvmBridge;
+  solanaProgram: anchor.Program<SolanaNode>;
   solanaProvider: anchor.AnchorProvider;
-  evmTokenAddress: string;
   solanaTokenAddress: string;
 
   constructor(
     evmWsUrl: string, 
     solanaRpcUrl: string, 
     evmBridgeAddress: string,
-    evmTokenAddress: string,
     solanaTokenAddress: string
   ) {
     this.evmProvider = new ethers.WebSocketProvider(evmWsUrl);
     this.evmBridgeAddress = evmBridgeAddress;
     this.solanaProvider = this.createAnchorProvider(solanaRpcUrl);
-    this.program = new Program(solanaNodeIdl as SolanaNode, this.solanaProvider);
-    this.evmTokenAddress = evmTokenAddress;
+    this.solanaProgram = new Program(solanaNodeIdl as SolanaNode, this.solanaProvider);
     this.solanaTokenAddress = solanaTokenAddress;
+    this.evmBridge = EvmBridge__factory.connect(this.evmBridgeAddress, this.evmProvider)
   }
 
   public async listenForMintEvent(): Promise<void> {
-    // TODO: move to class field
-    const evmBridge: EvmBridge = EvmBridge__factory.connect(this.evmBridgeAddress, this.evmProvider);
+    const mintEventFilter = this.evmBridge.filters.MintEvent();
 
-    const mintEventFilter = evmBridge.filters.MintEvent();
-
-    evmBridge.on(mintEventFilter, (event) => {
+    this.evmBridge.on(mintEventFilter, (event) => {
       // @ts-ignore - event is a string and TS complains as he wants strong types
       if (!event.args) return;
       // @ts-ignore
@@ -61,34 +57,32 @@ export class EvmListener {
   }
 
   public async listenForBurnEvent(): Promise<void> {
-    const evmBridge: EvmBridge = EvmBridge__factory.connect(this.evmBridgeAddress, this.evmProvider);
+    const burnEventFilter = this.evmBridge.filters.BurnEvent();
 
-    const burnEventFilter = evmBridge.filters.BurnEvent();
-
-    evmBridge.on(burnEventFilter, async (event) => {
+    this.evmBridge.on(burnEventFilter, async (event) => {
       // @ts-ignore - event is a string and TS complains as he wants strong types
       if (!event.args) return;
       // @ts-ignore
-      const tokenBurn = event.args[0];
+      const tokenBurn: string = event.args[0];
       // @ts-ignore
-      const tokenOwner = event.args[1];
+      const tokenOwner: string = event.args[1];
       // @ts-ignore
-      const amount = event.args[2];
+      const amount: number = event.args[2];
 
       console.log(">> EVM << BurnEvent emitted:");
       console.log("Token Burn Address:", tokenBurn);
       console.log("Token Owner:", tokenOwner);
       console.log("Amount:", amount);
 
-      await this.mintTokensToSolana(amount);
+      await this.mintTokensToSolana(amount, tokenBurn);
     });
 
     console.log(">> EVM << Listening for BurnEvent events");
   }
 
 
-  async mintTokensToSolana(amountToMint: number) {
-    const evmAddressAs32Bytes = evmAddressTo32Bytes(this.evmTokenAddress);
+  async mintTokensToSolana(amountToMint: number, evmTokenAddress: string) {
+    const evmAddressAs32Bytes = evmAddressTo32Bytes(evmTokenAddress);
 
     //// TODO: this is just for testing remove reading the balances
     const aliceTokenAta = (await getOrCreateAssociatedTokenAccount(
@@ -104,7 +98,7 @@ export class EvmListener {
 
     ////
 
-    const tx = await this.program.methods
+    const tx = await this.solanaProgram.methods
       .mintAndBridge(evmAddressAs32Bytes, new anchor.BN(amountToMint))
       .accounts({
         relayer: RELAYER.publicKey,
@@ -124,7 +118,6 @@ export class EvmListener {
     console.log("XXX : after mint alice balance change: ", aliceTokenAmountAfter - aliceTokenAmountBefore);
   }
 
-  // TODO: use imported function
   createAnchorProvider(rpcUrl: string) {
     const testKeyPath = path.join(__dirname, "../../solana-node/tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
     const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
@@ -144,5 +137,4 @@ export class EvmListener {
     );
     return provider;
   }
-
 }
