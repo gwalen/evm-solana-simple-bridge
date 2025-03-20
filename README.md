@@ -22,7 +22,7 @@ The project includes smart contracts on both chains, an off-chain relayer to lis
 - **Solana CLI**: Version **1.18.26** (install according to [instructions](https://www.anchor-lang.com/docs/installation#install-the-solana-cli)).
     After installation of `avm` and `solana-cli` run :
     ```
-    agave-install init 1.8.26
+    agave-install init 1.18.26
     avm install 0.30.1
     avm use 0.30.1
     ```
