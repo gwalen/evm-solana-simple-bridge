@@ -47,13 +47,13 @@ export class EvmListener {
       // @ts-ignore
       const amount = event.args[2];
 
-      console.log(">> EVM << MintEvent emitted:");
-      console.log("Token Burn Address:", tokenBurn);
-      console.log("Token Owner:", tokenOwner);
-      console.log("Amount:", amount);
+      console.log(">> EVM - MintEvent emitted:");
+      console.log("   Token Burn Address:", tokenBurn);
+      console.log("   Token Owner:", tokenOwner);
+      console.log("   Amount:", amount);
     });
 
-    console.log(">> EVM << Listening for MintEvent events...");
+    console.log(">> EVM - Listening for MintEvent events...");
   }
 
   public async listenForBurnEvent(): Promise<void> {
@@ -69,34 +69,20 @@ export class EvmListener {
       // @ts-ignore
       const amount: number = event.args[2];
 
-      console.log(">> EVM << BurnEvent emitted:");
-      console.log("Token Burn Address:", tokenBurn);
-      console.log("Token Owner:", tokenOwner);
-      console.log("Amount:", amount);
+      console.log(">> EVM - BurnEvent emitted:");
+      console.log("   Token Burn Address:", tokenBurn);
+      console.log("   Token Owner:", tokenOwner);
+      console.log("   Amount:", amount);
 
       await this.mintTokensToSolana(amount, tokenBurn);
     });
 
-    console.log(">> EVM << Listening for BurnEvent events");
+    console.log(">> EVM - Listening for BurnEvent events");
   }
 
 
   async mintTokensToSolana(amountToMint: number, evmTokenAddress: string) {
     const evmAddressAs32Bytes = evmAddressTo32Bytes(evmTokenAddress);
-
-    //// TODO: this is just for testing remove reading the balances
-    const aliceTokenAta = (await getOrCreateAssociatedTokenAccount(
-      this.solanaProvider.connection,
-      ALICE,  // payer
-      new PublicKey(this.solanaTokenAddress),
-      ALICE.publicKey, // ata owner
-    )).address;
-
-    const aliceTokenAmountBefore = Number(
-      (await this.solanaProvider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount
-    );
-
-    ////
 
     const tx = await this.solanaProgram.methods
       .mintAndBridge(evmAddressAs32Bytes, new anchor.BN(amountToMint))
@@ -109,13 +95,7 @@ export class EvmListener {
       .rpc()
       .catch(e => console.error(e));
 
-    console.log("Tx mint to solana: ", tx);
-
-    const aliceTokenAmountAfter = Number(
-      (await this.solanaProvider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount
-    );
-
-    console.log("XXX : after mint alice balance change: ", aliceTokenAmountAfter - aliceTokenAmountBefore);
+    console.log("Mint tokens to solana tx: ", tx);
   }
 
   createAnchorProvider(rpcUrl: string) {

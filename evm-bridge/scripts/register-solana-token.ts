@@ -6,7 +6,6 @@ import { EvmBridge, EvmBridge__factory, BridgeErc20, BridgeErc20__factory } from
 export async function registerSolanaTokenOnEvm(
   evmBridgeAddress: string, 
   evmTokenAddress: string,
-  // solanaTokenAddressAsHex: string,
   solanaTokenAddressAsBytes: Uint8Array
 ) {
   dotenv.config();
@@ -21,12 +20,9 @@ export async function registerSolanaTokenOnEvm(
   const evmBridge: EvmBridge = EvmBridge__factory.connect(evmBridgeAddress, wallet);
   const token: BridgeErc20 = BridgeErc20__factory.connect(evmTokenAddress, wallet);
 
-  console.log("owner: ", await evmBridge.owner());
-  // const tx = await evmBridge.registerForeignToken(evmTokenAddress, solanaTokenAddressAsHexBytes);
-  // const tx = await evmBridge.registerForeignToken(token, solanaTokenAddressAsHex);
+  // console.log("owner: ", await evmBridge.owner());
   const tx = await evmBridge.registerForeignToken(token, solanaTokenAddressAsBytes);
 
-  // Wait for the transaction to be mined.
   await tx.wait();
-  console.log("Transaction sent. Hash:", tx.hash);
+  // console.log("Register Solana token on Evm tx: ", tx.hash);
 }

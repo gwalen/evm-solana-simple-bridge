@@ -14,24 +14,24 @@ export async function initAccounts() {
   anchor.setProvider(provider)
   const baseWalletSolana = provider.wallet as anchor.Wallet;
 
-  console.log("Program id: ", program.programId.toBase58());
-  console.log("provider: ", provider.connection.rpcEndpoint);
+  // console.log("Program id: ", program.programId.toBase58());
+  // console.log("provider: ", provider.connection.rpcEndpoint);
 
-  const baseWalletSolBalance = await provider.connection.getBalance(baseWalletSolana.publicKey);
-  console.log("Base wallet (signer) SOL address: ", baseWalletSolana.publicKey.toBase58());
-  console.log("Base wallet (signer) SOL balance: ", baseWalletSolBalance);
+  // const baseWalletSolBalance = await provider.connection.getBalance(baseWalletSolana.publicKey);
+  // console.log("Base wallet (signer) SOL address: ", baseWalletSolana.publicKey.toBase58());
+  // console.log("Base wallet (signer) SOL balance: ", baseWalletSolBalance);
 
   const mintAmountForAlice = 25 * 10 ** MINT_DECIMALS;
-  console.log("ALICE   address: ", ALICE.publicKey.toBase58());
-  console.log("RELAYER address: ", RELAYER.publicKey.toBase58());
+  // console.log("ALICE   address: ", ALICE.publicKey.toBase58());
+  // console.log("RELAYER address: ", RELAYER.publicKey.toBase58());
 
   await airdrop(provider.connection, ALICE.publicKey);
   await airdrop(provider.connection, RELAYER.publicKey);
 
-  const aliceSolBalance = await provider.connection.getBalance(ALICE.publicKey);
-  const relayerSolBalance = await provider.connection.getBalance(ALICE.publicKey);
-  console.log("Alice   SOL balance: ", aliceSolBalance);
-  console.log("Relayer SOL balance: ", relayerSolBalance);
+  // const aliceSolBalance = await provider.connection.getBalance(ALICE.publicKey);
+  // const relayerSolBalance = await provider.connection.getBalance(ALICE.publicKey);
+  // console.log("Alice   SOL balance: ", aliceSolBalance);
+  // console.log("Relayer SOL balance: ", relayerSolBalance);
 
   const mintAddress = await createMint(
     provider.connection,
@@ -52,13 +52,13 @@ export async function initAccounts() {
     provider.connection,
     baseWalletSolana.payer,  //payer
     mintAddress,
-    aliceTokenAta, // destination
+    aliceTokenAta,           // destination
     baseWalletSolana.payer,  // authority
     mintAmountForAlice
   );
 
-  const aliceTokenAmount = Number((await provider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount);
-  console.log("Alice token amount: ", aliceTokenAmount);
+  // const aliceTokenAmount = Number((await provider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount);
+  // console.log("Alice token amount: ", aliceTokenAmount);
 
   await program.methods.
     initialize()
@@ -70,8 +70,8 @@ export async function initAccounts() {
     .rpc() 
     .catch(e => console.error(e));
 
-  const config = await program.account.config.fetch(deriveConfigPda(program.programId));
-  console.log(config)
+  // const config = await program.account.config.fetch(deriveConfigPda(program.programId));
+  // console.log(config)
 
   // give mint rights to the program
   await program.methods
@@ -89,7 +89,7 @@ export async function initAccounts() {
     solanaTokenAddress: mintAddress.toBase58(),
   };
   fs.writeFileSync("deployments.json", JSON.stringify(deployments, null, 2));
-  console.log("Deployed addresses saved to deployments.json");
+  console.log("Deployed Solana addresses saved to deployments.json");
 }
 
 initAccounts()
