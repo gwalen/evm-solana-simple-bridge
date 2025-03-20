@@ -1,12 +1,12 @@
 [package]
-name = "solana-node"
+name = "solana-bridge"
 version = "0.1.0"
-description = "Solana node bridge"
+description = "Solana bridge"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "solana_node"
+name = "solana_bridge"
 
 [features]
 default = []

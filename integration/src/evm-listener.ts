@@ -2,13 +2,13 @@ import { ethers } from "ethers";
 import { EvmBridge, EvmBridge__factory } from "../../evm-bridge/typechain-types"; // Adjust the import path accordingly
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { SolanaNode } from "../../solana-node/target/types/solana_node";
-import * as solanaNodeIdl from "../../solana-node/target/idl/solana_node.json";
+import { SolanaBridge } from "../../solana-bridge/target/types/solana_bridge";
+import * as solanaBridgeIdl from "../../solana-bridge/target/idl/solana_bridge.json";
 import * as fs from "fs";
 import path from "path";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { ALICE, RELAYER } from "../../solana-node/tests/consts";
-import { evmAddressTo32Bytes } from "../../solana-node/tests/utils";
+import { ALICE, RELAYER } from "../../solana-bridge/tests/consts";
+import { evmAddressTo32Bytes } from "../../solana-bridge/tests/utils";
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 
 
@@ -16,7 +16,7 @@ export class EvmListener {
   evmBridgeAddress: string;
   evmProvider: ethers.WebSocketProvider;
   evmBridge: EvmBridge;
-  solanaProgram: anchor.Program<SolanaNode>;
+  solanaProgram: anchor.Program<SolanaBridge>;
   solanaProvider: anchor.AnchorProvider;
   solanaTokenAddress: string;
 
@@ -29,7 +29,7 @@ export class EvmListener {
     this.evmProvider = new ethers.WebSocketProvider(evmWsUrl);
     this.evmBridgeAddress = evmBridgeAddress;
     this.solanaProvider = this.createAnchorProvider(solanaRpcUrl);
-    this.solanaProgram = new Program(solanaNodeIdl as SolanaNode, this.solanaProvider);
+    this.solanaProgram = new Program(solanaBridgeIdl as SolanaBridge, this.solanaProvider);
     this.solanaTokenAddress = solanaTokenAddress;
     this.evmBridge = EvmBridge__factory.connect(this.evmBridgeAddress, this.evmProvider)
   }
@@ -119,7 +119,7 @@ export class EvmListener {
   }
 
   createAnchorProvider(rpcUrl: string) {
-    const testKeyPath = path.join(__dirname, "../../solana-node/tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
+    const testKeyPath = path.join(__dirname, "../../solana-bridge/tests/keys/pFCBP4bhqdSsrWUVTgqhPsLrfEdChBK17vgFM7TxjxQ.json"); // use script dir as base dir
     const privateKeySolanaStr = fs.readFileSync(testKeyPath, "utf-8");
     const privateKeySolanaParsed = JSON.parse(privateKeySolanaStr) as number[];
     const solanaPrivateKey = new Uint8Array(privateKeySolanaParsed);

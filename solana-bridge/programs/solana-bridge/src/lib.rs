@@ -15,11 +15,9 @@ use handlers::*;
 
 declare_id!("BNnLzXd4awDnxnycVseH2aN2dHV5grBQc6ucJJabtiZt");
 
-// TODO: 3. Add mint instruction with events
-// TODO: 4. Rename project to solana-bridge
 
 #[program]
-pub mod solana_node {
+pub mod solana_bridge {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {

@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { SolanaNode } from "../target/types/solana_node";
+import { SolanaBridge } from "../target/types/solana_bridge";
 import { MINT_DECIMALS, OWNER, RELAYER } from "./consts";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { airdrop, deriveConfigPda, deriveForeignTokenPda, evmAddressTo32Bytes, sleep } from "./utils";
@@ -10,14 +10,14 @@ import { createMint, getMint, getOrCreateAssociatedTokenAccount, mintTo } from "
 
 const USDC_ETHEREUM_MAINNET = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
-describe("solana-node", () => {
+describe("solana-bridge", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const baseWallet = provider.wallet as anchor.Wallet;
 
-  const program = anchor.workspace.SolanaNode as Program<SolanaNode>;
+  const program = anchor.workspace.SolanaBridge as Program<SolanaBridge>;
   const firstMintOwner = Keypair.generate();
   const alice = Keypair.generate();
 
@@ -86,8 +86,8 @@ describe("solana-node", () => {
   });
 
   it("Take token authority", async () => {
-    console.log(`Created new mint: ${mintAddress.toBase58()}`);
-    console.log(`First mint owner: ${firstMintOwner.publicKey.toBase58()}`);
+    // console.log(`Created new mint: ${mintAddress.toBase58()}`);
+    // console.log(`First mint owner: ${firstMintOwner.publicKey.toBase58()}`);
 
     await program.methods
       .takeTokenMintAuthority()
@@ -101,10 +101,9 @@ describe("solana-node", () => {
 
     const mintInfo = await getMint(provider.connection, mintAddress);
 
-    console.log("New owner should be config pda: ", configPda.toBase58());
-
-    console.log("Mint : mint authority: ", mintInfo.mintAuthority.toBase58());
-    console.log("Mint : freeze authority: ", mintInfo.freezeAuthority.toBase58());
+    // console.log("New owner should be config pda: ", configPda.toBase58());
+    // console.log("Mint : mint authority: ", mintInfo.mintAuthority.toBase58());
+    // console.log("Mint : freeze authority: ", mintInfo.freezeAuthority.toBase58());
 
     assert.deepEqual(mintInfo.mintAuthority, configPda);
   });
@@ -117,7 +116,6 @@ describe("solana-node", () => {
     let burnEventAmount = new anchor.BN(0);
 
     const listenerMyEvent = program.addEventListener('burnEvent', (event, slot) => {
-      // console.log(`slot ${slot} burn event amount ${event.amount}`);
       burnEventAmount = event.amount;
     });
 
@@ -143,7 +141,7 @@ describe("solana-node", () => {
     const evmAddressAs32Bytes = evmAddressTo32Bytes(USDC_ETHEREUM_MAINNET);
 
     const foreignTokenPda = deriveForeignTokenPda(program.programId, evmAddressAs32Bytes);
-    console.log("foreignTokenPda", foreignTokenPda.toBase58());
+    // console.log("foreignTokenPda", foreignTokenPda.toBase58());
 
     await program.methods
       .registerForeignToken(evmAddressAs32Bytes)
@@ -156,7 +154,6 @@ describe("solana-node", () => {
 
     const foreignTokenAccount = await program.account.foreignToken.fetch(foreignTokenPda);
     
-    // console.log(foreignTokenAccount);
     assert.equal(mintAddress.toBase58(), foreignTokenAccount.localAddress.toBase58());
     assert.deepEqual(evmAddressAs32Bytes, foreignTokenAccount.foreignAddress);
   });

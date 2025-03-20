@@ -5,12 +5,12 @@ import { EvmListener } from "./evm-listener";
 import * as fs from "fs";
 import { evmBurnAndBridgeAliceTokens } from "../../evm-bridge/scripts/alice-burn-and-bridge"
 import { registerSolanaTokenOnEvm } from "../../evm-bridge/scripts/register-solana-token"
-import { solanaBurnAndBridgeAliceTokens } from "../../solana-node/scripts/alice-burn-and-bridge"
-import { registerEvmTokenOnSolana } from "../../solana-node/scripts/register-evm-token"
-import { SolanaDeployments } from "../../solana-node/tests/utils"
+import { solanaBurnAndBridgeAliceTokens } from "../../solana-bridge/scripts/alice-burn-and-bridge"
+import { registerEvmTokenOnSolana } from "../../solana-bridge/scripts/register-evm-token"
+import { SolanaDeployments } from "../../solana-bridge/tests/utils"
 import { EvmDeployments } from "../../evm-bridge/scripts/utils"
 import { SolanaListener } from "./solana-listener";
-import { MINT_DECIMALS as SOLANA_TOKEN_DECIMALS } from "../../solana-node/tests/consts";
+import { MINT_DECIMALS as SOLANA_TOKEN_DECIMALS } from "../../solana-bridge/tests/consts";
 import { PublicKey } from "@solana/web3.js";
 
 
@@ -67,7 +67,6 @@ export async function appListen() {
   await evmBurnAndBridgeAliceTokens(evmBridgeAddress, evmTokenAddress, 1000n);
   await solanaBurnAndBridgeAliceTokens(new anchor.BN(1 * 10 ** SOLANA_TOKEN_DECIMALS));
 
-  // TODO: rename SolanaNode to SolanaBridge
 
   // TODO: README : how to install all components and build / test unit / test integration
 }
@@ -108,7 +107,7 @@ function deployEvmContracts(): Promise<void> {
 function initializeSolanaContracts(): Promise<void> {
   return new Promise((resolve, reject) => {
     // Resolve the path to the solana-bridge directory relative to this file
-    const solanaBridgeDir = path.resolve(__dirname, "../../solana-node");
+    const solanaBridgeDir = path.resolve(__dirname, "../../solana-bridge");
 
     const command = "npx";
     const args = ["ts-node", "./scripts/init-accounts.ts"];
@@ -152,7 +151,7 @@ async function initializeSolana(): Promise<[string, string]> {
     console.log("Init Solana contracts and accounts...");
     await initializeSolanaContracts();
 
-    const deploymentsJson = fs.readFileSync("../solana-node/deployments.json", "utf-8");
+    const deploymentsJson = fs.readFileSync("../solana-bridge/deployments.json", "utf-8");
     const deployments: SolanaDeployments = JSON.parse(deploymentsJson);
 
     console.log("Solana bridge address:", deployments.solanaBridge);
