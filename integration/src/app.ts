@@ -18,6 +18,11 @@ import { PublicKey } from "@solana/web3.js";
 const EVM_BRIDGE_CONTRACT_ADDRESS = "0x663F3ad617193148711d28f5334eE4Ed07016602";
 
 export async function appListen() {
+  const evmRelayerPrivateKey = process.env.RELAYER_PRIVATE_KEY_EVM;
+  if (!evmRelayerPrivateKey) throw new Error("RELAYER_PRIVATE_KEY_EVM not set");
+  const aliceRelayerPrivateKey = process.env.ALICE_PRIVATE_KEY_EVM;
+  if (!aliceRelayerPrivateKey) throw new Error("ALICE_PRIVATE_KEY_EVM not set");
+
   let [evmBridgeAddress, evmTokenAddress] = await initializeEvm();
   console.log("Evm contracts deployed");
   let [solanaBridgeAddress, solanaTokenAddress] = await initializeSolana();
@@ -47,16 +52,20 @@ export async function appListen() {
   evmListener.listenForMintEvent();
 
   console.log("Starting Solana listeners...");
-  const solanaListener = new SolanaListener("http://127.0.0.1:8899");
+  const solanaListener = new SolanaListener(
+    "http://localhost:8545", // TODO: move this to .env
+    "http://127.0.0.1:8899",
+    evmBridgeAddress,
+    evmTokenAddress,
+    solanaTokenAddress,
+    aliceRelayerPrivateKey,
+    evmRelayerPrivateKey,
+  );
   solanaListener.listenForBurnEvent();
   solanaListener.listenForMintEvent();
 
   await evmBurnAndBridgeAliceTokens(evmBridgeAddress, evmTokenAddress, 1000n);
   await solanaBurnAndBridgeAliceTokens(new anchor.BN(1 * 10 ** SOLANA_TOKEN_DECIMALS));
-
-  // TODO: mint tokens on EVM on BurnEvent on Solana
-
-  // TODO: mint tokens on Solana on BurnEvent on EVM
 
   // TODO: rename SolanaNode to SolanaBridge
 
