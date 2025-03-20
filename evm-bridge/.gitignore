@@ -2,7 +2,6 @@ cache
 lib
 node_modules
 out
-
 broadcast
 etherscan.json
 .DS_Store
@@ -10,6 +9,7 @@ artifacts/
 cache*
 typechain-types/
 
+.anvil_log
 deployments.json
 
 *.out

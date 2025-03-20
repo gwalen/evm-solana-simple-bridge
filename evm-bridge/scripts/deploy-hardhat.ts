@@ -1,7 +1,5 @@
 import hre from "hardhat";
 const { ethers, upgrades } = hre;
-import { JsonRpcProvider } from "ethers";
-import { EvmBridge } from "../typechain-types"; // adjust path as needed
 import { keccak256, toUtf8Bytes } from "ethers";
 import * as fs from "fs";
 import * as dotenv from 'dotenv';
@@ -9,9 +7,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export async function deployContracts() {
-  // Read environment variables
-  const deployerPrivateKey = process.env.OWNER_PRIVATE_KEY;
-  if (!deployerPrivateKey) throw new Error("OWNER_PRIVATE_KEY not set");
+  const deployerPrivateKey = process.env.OWNER_PRIVATE_KEY_EVM;
+  if (!deployerPrivateKey) throw new Error("OWNER_PRIVATE_KEY_EVM not set");
 
   const owner = process.env.OWNER;
   if (!owner) throw new Error("OWNER not set");
@@ -39,10 +36,6 @@ export async function deployContracts() {
       kind: "uups",
     }
   );
-  // const evmBridge = await upgrades.deployProxy(
-  //   EvmBridgeFactory,
-  //   [owner, relayer]
-  // );
   await evmBridge.waitForDeployment();
   const evmBridgeAddress = await evmBridge.getAddress();
   console.log("EvmBridge deployed at:", evmBridgeAddress);
@@ -67,13 +60,13 @@ export async function deployContracts() {
   // Register the token with the EvmBridge contract
   const txRegister = await evmBridge.registerForeignToken(token.getAddress(), foreignId);
   await txRegister.wait();
-  console.log("Token registered with EvmBridge");
+  // console.log("Token registered with EvmBridge");
 
   // Mint tokens to alice for future use
   const txMint = await token.mint(alice, 100 * 10**6);
   await txMint.wait();
 
-  console.log(await token.balanceOf(alice));
+  // console.log(await token.balanceOf(alice));
 
   // Write the deployed addresses to a deployments.json file
   const deployments = {
@@ -81,9 +74,7 @@ export async function deployContracts() {
     evmTokenAddress: tokenAddress,
   };
   fs.writeFileSync("deployments.json", JSON.stringify(deployments, null, 2));
-  console.log("Deployed addresses saved to deployments.json");
-
-  console.log("Deployment complete!");
+  console.log("Deployed EVM addresses saved to deployments.json");
 }
 
 deployContracts()
