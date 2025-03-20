@@ -83,9 +83,6 @@ describe("solana-bridge", () => {
   });
 
   it("Take token authority", async () => {
-    // console.log(`Created new mint: ${mintAddress.toBase58()}`);
-    // console.log(`First mint owner: ${firstMintOwner.publicKey.toBase58()}`);
-
     await program.methods
       .takeTokenMintAuthority()
       .accounts({
@@ -97,10 +94,6 @@ describe("solana-bridge", () => {
       .rpc({ skipPreflight: true });
 
     const mintInfo = await getMint(provider.connection, mintAddress);
-
-    // console.log("New owner should be config pda: ", configPda.toBase58());
-    // console.log("Mint : mint authority: ", mintInfo.mintAuthority.toBase58());
-    // console.log("Mint : freeze authority: ", mintInfo.freezeAuthority.toBase58());
 
     assert.deepEqual(mintInfo.mintAuthority, configPda);
   });

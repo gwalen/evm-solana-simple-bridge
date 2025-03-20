@@ -60,13 +60,10 @@ export async function deployContracts() {
   // Register the token with the EvmBridge contract
   const txRegister = await evmBridge.registerForeignToken(token.getAddress(), foreignId);
   await txRegister.wait();
-  // console.log("Token registered with EvmBridge");
 
   // Mint tokens to alice for future use
   const txMint = await token.mint(alice, 100 * 10**6);
   await txMint.wait();
-
-  // console.log(await token.balanceOf(alice));
 
   // Write the deployed addresses to a deployments.json file
   const deployments = {

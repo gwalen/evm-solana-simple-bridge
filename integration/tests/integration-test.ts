@@ -20,7 +20,7 @@ import { initializeEvm, initializeSolana, spawnAnvil, spawnSolanaValidator } fro
 
 describe("integration-test", () => {
   let anvilProcess: ChildProcess;
-  let validatorProcess: ChildProcess;
+  let solanaValidatorProcess: ChildProcess;
   let evmRelayerPrivateKey: string;
   let evmAlicePrivateKey: string;
   let solanaAlicePrivateKey: string;
@@ -43,7 +43,7 @@ describe("integration-test", () => {
 
   it("spawn local test blockchains", async () => {
     anvilProcess = await spawnAnvil();
-    validatorProcess = await spawnSolanaValidator();
+    solanaValidatorProcess = await spawnSolanaValidator();
   });
 
   it("setup addresses", async () => {
@@ -152,7 +152,7 @@ describe("integration-test", () => {
     await sleep(10000);
     console.log("Shutting down test networks...");
     anvilProcess.kill();
-    validatorProcess.kill();
+    solanaValidatorProcess.kill();
     exit(0);
   });
 });

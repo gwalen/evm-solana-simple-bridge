@@ -20,9 +20,7 @@ export async function registerSolanaTokenOnEvm(
   const evmBridge: EvmBridge = EvmBridge__factory.connect(evmBridgeAddress, wallet);
   const token: BridgeErc20 = BridgeErc20__factory.connect(evmTokenAddress, wallet);
 
-  // console.log("owner: ", await evmBridge.owner());
   const tx = await evmBridge.registerForeignToken(token, solanaTokenAddressAsBytes);
 
   await tx.wait();
-  // console.log("Register Solana token on Evm tx: ", tx.hash);
 }
