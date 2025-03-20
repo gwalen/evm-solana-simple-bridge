@@ -27,16 +27,6 @@ pub struct TakeTokenMintAuthority<'info> {
     )]
     pub token_mint: Account<'info, Mint>,
 
-    // #[account(
-    //     init,
-    //     payer = owner,
-    //     mint::decimals = 6,
-    //     mint::authority = owner, // or owner.key() // TODO: CHECK
-    //     mint::freeze_authority = owner
-    // )]
-    // pub token_mint: Account<'info, Mint>,
-
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>
-
 }
