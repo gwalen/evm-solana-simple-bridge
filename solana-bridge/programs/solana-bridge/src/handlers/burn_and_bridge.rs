@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use crate::{instructions::burn_and_bridge::BurnAndBridge, utils::events::BurnEvent};
 use anchor_spl::token::{self};
 
+/// For documentation, refer to `lib.rs`.  
 pub fn handle(ctx: Context<BurnAndBridge>, amount: u64) -> Result<()> {
     let burn_token_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
