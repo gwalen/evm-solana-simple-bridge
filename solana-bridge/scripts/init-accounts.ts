@@ -14,24 +14,10 @@ export async function initAccounts() {
   anchor.setProvider(provider)
   const baseWalletSolana = provider.wallet as anchor.Wallet;
 
-  // console.log("Program id: ", program.programId.toBase58());
-  // console.log("provider: ", provider.connection.rpcEndpoint);
-
-  // const baseWalletSolBalance = await provider.connection.getBalance(baseWalletSolana.publicKey);
-  // console.log("Base wallet (signer) SOL address: ", baseWalletSolana.publicKey.toBase58());
-  // console.log("Base wallet (signer) SOL balance: ", baseWalletSolBalance);
-
   const mintAmountForAlice = 25 * 10 ** MINT_DECIMALS;
-  // console.log("ALICE   address: ", ALICE.publicKey.toBase58());
-  // console.log("RELAYER address: ", RELAYER.publicKey.toBase58());
 
   await airdrop(provider.connection, ALICE.publicKey);
   await airdrop(provider.connection, RELAYER.publicKey);
-
-  // const aliceSolBalance = await provider.connection.getBalance(ALICE.publicKey);
-  // const relayerSolBalance = await provider.connection.getBalance(ALICE.publicKey);
-  // console.log("Alice   SOL balance: ", aliceSolBalance);
-  // console.log("Relayer SOL balance: ", relayerSolBalance);
 
   const mintAddress = await createMint(
     provider.connection,
@@ -57,9 +43,6 @@ export async function initAccounts() {
     mintAmountForAlice
   );
 
-  // const aliceTokenAmount = Number((await provider.connection.getTokenAccountBalance(aliceTokenAta)).value.amount);
-  // console.log("Alice token amount: ", aliceTokenAmount);
-
   await program.methods.
     initialize()
     .accounts({
@@ -69,9 +52,6 @@ export async function initAccounts() {
     .signers([baseWalletSolana.payer])
     .rpc() 
     .catch(e => console.error(e));
-
-  // const config = await program.account.config.fetch(deriveConfigPda(program.programId));
-  // console.log(config)
 
   // give mint rights to the program
   await program.methods

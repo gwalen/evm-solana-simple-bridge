@@ -67,8 +67,6 @@ export class SolanaListener {
   }
 
   async mintTokensToEvm(amountToMint: number, solanaToken: PublicKey) {
-    // console.log("Alice (receiver) wallet address:, ", this.evmAliceWallet.address)
-
     const tx = await this.evmBridge.mintAndBridge(
       this.evmToken, 
       solanaToken.toBytes(),

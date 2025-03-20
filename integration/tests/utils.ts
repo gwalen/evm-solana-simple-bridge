@@ -96,8 +96,6 @@ export async function initializeEvm(): Promise<[string, string]> {
   await deployEvmContracts();
   const deploymentsJson = fs.readFileSync("../evm-bridge/deployments.json", "utf-8");
   const deployments: EvmDeployments = JSON.parse(deploymentsJson);
-  // console.log("Evm bridge address:", deployments.evmBridge);
-  // console.log("Evm token address:", deployments.evmTokenAddress);
   return [deployments.evmBridge, deployments.evmTokenAddress];
 }
 
@@ -106,7 +104,5 @@ export async function initializeSolana(): Promise<[string, string]> {
   await initializeSolanaContracts();
   const deploymentsJson = fs.readFileSync("../solana-bridge/deployments.json", "utf-8");
   const deployments: SolanaDeployments = JSON.parse(deploymentsJson);
-  // console.log("Solana bridge address:", deployments.solanaBridge);
-  // console.log("Solana token address:", deployments.solanaTokenAddress);
   return [deployments.solanaBridge, deployments.solanaTokenAddress];
 }
