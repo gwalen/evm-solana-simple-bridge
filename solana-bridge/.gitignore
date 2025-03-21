@@ -5,7 +5,7 @@ target
 node_modules
 test-ledger
 .yarn
-.standalone_ledger
+.standalone_ledger/test-ledger
 
 deployments.json
 .solana_validator_log
