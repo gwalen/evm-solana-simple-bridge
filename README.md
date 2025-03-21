@@ -5,7 +5,7 @@ The project includes smart contracts on both chains, an off-chain relayer to lis
 ## Prerequisites & Tools
 
 ### General Tools
-- **Node.js**: Version **>= 21**  
+- **Node.js**: Version **>= 22**  
   *(Recommended: use [nvm](https://github.com/nvm-sh/nvm) for managing Node versions)*
 - **Yarn**: Package manager
 - **Rust**: Install **rustc 1.75.0**
@@ -70,6 +70,7 @@ The off-chain relayer app has the rights to call the `mintAndBridge` function us
 3. **Install Forge Dependencies**
    ```sh
    forge install
+   forge install foundry-rs/forge-std
    ```
 
 4. **Build Contracts**
