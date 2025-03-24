@@ -8,7 +8,7 @@ The project includes smart contracts on both chains, an off-chain relayer to lis
 - **Node.js**: Version **>= 22**  
   *(Recommended: use [nvm](https://github.com/nvm-sh/nvm) for managing Node versions)*
 - **Yarn**: Package manager
-- **Rust**: Install **rustc 1.75.0**
+- **Rust**: Install **rustc >= 1.75.0**
 
 - **nvm**: For Node version management
 - **avm**: For installing and managing the required version of Anchor
